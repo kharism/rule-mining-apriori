@@ -7,7 +7,15 @@ import(
 	"sort"
 	. "github.com/kharism/hashtree"
 	"os"
+	"flag"
 	//"encoding/csv"
+)
+var (
+	threshold           = flag.Float64("threshold",0.0000005,"Threshold 1")
+	itemSetLen          = flag.Int("itemlen",3,"item len")
+	filename            = flag.String("file","songPop.csv","file name")
+	confidenceThreshold = flag.Float64("confidenceFilter",0.10,"confidence filter for rule found")
+	countThreshold		= flag.Int("countThreshold",10,"transaction count threshold for rule found")
 )
 func contains(arr []int,i int)bool{
 	for _,j:=range(arr){
@@ -32,9 +40,10 @@ type HashCount struct{
 	
 } 
 func main(){
-	threshold:=0.00005
-	itemSetLen := 3
-	file,_:=ioutil.ReadFile("5000-out1.csv")
+	//threshold:=0.0000005
+	//itemSetLen := 3
+	flag.Parse()
+	file,_:=ioutil.ReadFile(*filename)
 	data := strings.Split(string(file),"\n")
 	//root := make(map[int]*HashNode)
 	recordCount:=len(data)-1
@@ -87,7 +96,7 @@ func main(){
 	}
 	sort.Ints(keys)
 	for _,key:=range(keys){
-		if itemCountF[key]>=threshold{
+		if itemCountF[key]>=*threshold{
 			frequentItems = append(frequentItems,key)
 			frequentItemset = append(frequentItemset,[]int{key})
 		}
@@ -96,10 +105,11 @@ func main(){
 	root:=&HashNode{}
 	subRoot:=&HashNode{}
 	
-	for count:=1;count<itemSetLen;count++{
+	for count:=1;count<*itemSetLen;count++{
 		newFrequentItemset:=[][]int{}
 		// i = array of int 
 		for _,i:=range(frequentItemset){
+			
 			curFreq :=1.0
 			for _,j:=range(i){
 				curFreq=curFreq*itemCountF[j]
@@ -108,7 +118,7 @@ func main(){
 				if i[len(i)-1]>=j{
 					continue
 				}
-				if curFreq*itemCountF[j]>=threshold{
+				if curFreq*itemCountF[j]>=*threshold{
 					k:=append(i,j)
 					if len(i)==3{
 						//fmt.Println(i,j)
@@ -122,7 +132,7 @@ func main(){
 			}
 		}
 		//add subroot for calculating confidence 
-		if count==itemSetLen-2{
+		if count==*itemSetLen-2{
 			fmt.Println("add subroot")
 			fmt.Println("aaa",len(newFrequentItemset))
 			subFrequentItemset = newFrequentItemset
@@ -131,19 +141,19 @@ func main(){
 				subRoot.AddNodeWithoutValue(itemset)
 			}
 			for _,itemset:=range(transactions){
-				if len(itemset)<itemSetLen-1{
+				if len(itemset)<*itemSetLen-1{
 					continue
 				}
 				fmt.Println("Ordered Combination of ",itemset)
-				if len(itemset)==itemSetLen-1{
+				if len(itemset)==*itemSetLen-1{
 					fmt.Println("Adding value to node ",itemset)
 					subRoot.AddValueWithoutCreate(itemset)
 				}else{
 					fmt.Println("Check Every Possible combination")
-					for i:=0;i<=len(itemset)-itemSetLen+1;i++{
+					for i:=0;i<=len(itemset)-*itemSetLen+1;i++{
 						fmt.Println(itemset[i])
-						for j:=i+1;j<=len(itemset)-itemSetLen+2;j++{
-							k:=append([]int{itemset[i]},itemset[j:itemSetLen+j-2]...)
+						for j:=i+1;j<=len(itemset)-*itemSetLen+2;j++{
+							k:=append([]int{itemset[i]},itemset[j:*itemSetLen+j-2]...)
 							fmt.Println("Adding value to node ",k)
 							subRoot.AddValueWithoutCreate(k)
 							
@@ -153,9 +163,41 @@ func main(){
 				
 			}
 			
-		}
+		} 
 		//fmt.Println(newFrequentItemset)
 		frequentItemset= newFrequentItemset
+	}
+	if *itemSetLen==2{
+		fmt.Println("ooops")
+		for _,jj:=range(frequentItems){
+			subFrequentItemset = append(subFrequentItemset,[]int{jj})
+		}
+		for _,itemset:=range(subFrequentItemset){
+			//fmt.Println("adding node ",itemset,"to ")
+			subRoot.AddNodeWithoutValue(itemset)
+		}
+		for _,itemset:=range(transactions){
+			if len(itemset)<*itemSetLen-1{
+				continue
+			}
+			fmt.Println("Ordered Combination of ",itemset)
+			if len(itemset)==*itemSetLen-1{
+				fmt.Println("Adding value to node ",itemset)
+				subRoot.AddValueWithoutCreate(itemset)
+			}else{
+				fmt.Println("Check Every Possible combination")
+				for i:=0;i<=len(itemset)-*itemSetLen+1;i++{
+					fmt.Println(itemset[i])
+					for j:=i+1;j<=len(itemset)-*itemSetLen+2;j++{
+						k:=append([]int{itemset[i]},itemset[j:*itemSetLen+j-2]...)
+						fmt.Println("Adding value to node ",k)
+						subRoot.AddValueWithoutCreate(k)
+						
+					}
+				}
+			}
+				
+		}
 	}
 	//fmt.Println(frequentItemset)
 	//Generating HashTree from frequent itemset
@@ -168,18 +210,18 @@ func main(){
 	}
 	fmt.Println("Add transactions to root")
 	for _,itemset:=range(transactions){
-		if len(itemset)<itemSetLen{
+		if len(itemset)<*itemSetLen{
 			continue
 		}
-		if len(itemset)==itemSetLen{
+		if len(itemset)==*itemSetLen{
 			fmt.Println("Add Langsung",itemset)
 			root.AddValueRecursive(itemset)
 		} else{
 			fmt.Println("Ordered Combination of ",itemset)
-			for i:=0;i<=len(itemset)-itemSetLen+1;i++{
+			for i:=0;i<=len(itemset)-*itemSetLen+1;i++{
 				//fmt.Println(itemset[i])
-				for j:=i+1;j<=len(itemset)-itemSetLen+1;j++{
-					k:=append([]int{itemset[i]},itemset[j:itemSetLen+j-1]...)
+				for j:=i+1;j<=len(itemset)-*itemSetLen+1;j++{
+					k:=append([]int{itemset[i]},itemset[j:*itemSetLen+j-1]...)
 					fmt.Println(k)
 					root.AddValueRecursive(k)
 				}
@@ -197,34 +239,37 @@ func main(){
 		
 	}
 	fmt.Println("sub-Item Count")
+	//fmt.Println(len(subFrequentItemset))
 	for _,itemset:=range(subFrequentItemset){
 		j,_:=subRoot.GetValueRecursive(itemset)
-		if j>10{
+		if j>0{
 			fmt.Println(itemset,j)
 		}
 	}
 	fmt.Println("Rule Mining")
 	fmt.Println("=====")
+	//fmt.Println(len(frequentItemset))
 	for _,itemset:=range(frequentItemset){
+		//fmt.Println("zzz")
 		allCount,_:=root.GetValueRecursive(itemset)
 		if allCount==0{
-			//fmt.Println("Kosong")
+			//fmt.Println("itemset",itemset,"Kosong")
 			continue
 		}
 		//fmt.Println("Periksa sub-Itemset",itemset)
-		for i:=0;i<=itemSetLen-1;i++{
+		for i:=0;i<=*itemSetLen-1;i++{
 			//fmt.Println("check appending",i,itemset[i])
 			//fmt.Println("check appending2",i+1,itemSetLen-1)
-			for j:=i+1;j<itemSetLen-1;j++{
+			for j:=i+1;j<=*itemSetLen-1;j++{
 				k:=[]int{itemset[i]}
 				//fmt.Println(k,itemset[j:j+itemSetLen-2])
-				k = append(k,itemset[j:j+itemSetLen-2]...)
+				k = append(k,itemset[j:j+*itemSetLen-2]...)
 				//fmt.Println(k)
 				ua,err:=subRoot.GetValueRecursive(k)
 				
 				if err==nil && ua>0{
 					confidentLevel:=float64(allCount)/float64(ua)
-					if ua>=10 && allCount>=10{
+					if confidentLevel>*confidenceThreshold && ua>=*countThreshold && allCount>=*countThreshold{
 						fmt.Println("Confident Level",k,itemset,ua,allCount,confidentLevel)
 					}
 					
