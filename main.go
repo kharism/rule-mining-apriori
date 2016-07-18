@@ -47,7 +47,7 @@ func main(){
 	data := strings.Split(string(file),"\n")
 	//root := make(map[int]*HashNode)
 	recordCount:=len(data)-1
-	fmt.Println(len(data))
+	//fmt.Println(len(data))
 	itemCount:=make(map[int]int)
 	itemCountF:=make(map[int]float64)
 	transactions:=[][]int{}
@@ -74,7 +74,7 @@ func main(){
 		
 		sort.Ints(transaction)
 		if len(transaction)==0{
-			fmt.Println(i)
+			//fmt.Println(i)
 			continue
 		}
 		//fmt.Println("Adding transaction",transaction)
@@ -133,8 +133,8 @@ func main(){
 		}
 		//add subroot for calculating confidence 
 		if count==*itemSetLen-2{
-			fmt.Println("add subroot")
-			fmt.Println("aaa",len(newFrequentItemset))
+			//fmt.Println("add subroot")
+			//fmt.Println("aaa",len(newFrequentItemset))
 			subFrequentItemset = newFrequentItemset
 			for _,itemset:=range(subFrequentItemset){
 				//fmt.Println("adding node ",itemset,"to ")
@@ -144,17 +144,17 @@ func main(){
 				if len(itemset)<*itemSetLen-1{
 					continue
 				}
-				fmt.Println("Ordered Combination of ",itemset)
+				//fmt.Println("Ordered Combination of ",itemset)
 				if len(itemset)==*itemSetLen-1{
-					fmt.Println("Adding value to node ",itemset)
+					//fmt.Println("Adding value to node ",itemset)
 					subRoot.AddValueWithoutCreate(itemset)
 				}else{
-					fmt.Println("Check Every Possible combination")
+					//fmt.Println("Check Every Possible combination")
 					for i:=0;i<=len(itemset)-*itemSetLen+1;i++{
-						fmt.Println(itemset[i])
+						//fmt.Println(itemset[i])
 						for j:=i+1;j<=len(itemset)-*itemSetLen+2;j++{
 							k:=append([]int{itemset[i]},itemset[j:*itemSetLen+j-2]...)
-							fmt.Println("Adding value to node ",k)
+							//fmt.Println("Adding value to node ",k)
 							subRoot.AddValueWithoutCreate(k)
 							
 						}
@@ -168,7 +168,7 @@ func main(){
 		frequentItemset= newFrequentItemset
 	}
 	if *itemSetLen==2{
-		fmt.Println("ooops")
+		//fmt.Println("ooops")
 		for _,jj:=range(frequentItems){
 			subFrequentItemset = append(subFrequentItemset,[]int{jj})
 		}
@@ -180,17 +180,17 @@ func main(){
 			if len(itemset)<*itemSetLen-1{
 				continue
 			}
-			fmt.Println("Ordered Combination of ",itemset)
+			//fmt.Println("Ordered Combination of ",itemset)
 			if len(itemset)==*itemSetLen-1{
-				fmt.Println("Adding value to node ",itemset)
+				//fmt.Println("Adding value to node ",itemset)
 				subRoot.AddValueWithoutCreate(itemset)
 			}else{
-				fmt.Println("Check Every Possible combination")
+				//fmt.Println("Check Every Possible combination")
 				for i:=0;i<=len(itemset)-*itemSetLen+1;i++{
-					fmt.Println(itemset[i])
+					//fmt.Println(itemset[i])
 					for j:=i+1;j<=len(itemset)-*itemSetLen+2;j++{
 						k:=append([]int{itemset[i]},itemset[j:*itemSetLen+j-2]...)
-						fmt.Println("Adding value to node ",k)
+						//fmt.Println("Adding value to node ",k)
 						subRoot.AddValueWithoutCreate(k)
 						
 					}
@@ -204,25 +204,25 @@ func main(){
 	//5 & 3->3
 	//5 & 4->2
 	//4 & 5->1
-	fmt.Println("aab",len(frequentItemset))
+	//fmt.Println("aab",len(frequentItemset))
 	for _,itemset:=range(frequentItemset){
 		root.AddNodeWithoutValue(itemset)
 	}
-	fmt.Println("Add transactions to root")
+	//fmt.Println("Add transactions to root")
 	for _,itemset:=range(transactions){
 		if len(itemset)<*itemSetLen{
 			continue
 		}
 		if len(itemset)==*itemSetLen{
-			fmt.Println("Add Langsung",itemset)
+			//fmt.Println("Add Langsung",itemset)
 			root.AddValueRecursive(itemset)
 		} else{
-			fmt.Println("Ordered Combination of ",itemset)
+			//fmt.Println("Ordered Combination of ",itemset)
 			for i:=0;i<=len(itemset)-*itemSetLen+1;i++{
 				//fmt.Println(itemset[i])
 				for j:=i+1;j<=len(itemset)-*itemSetLen+1;j++{
 					k:=append([]int{itemset[i]},itemset[j:*itemSetLen+j-1]...)
-					fmt.Println(k)
+					//fmt.Println(k)
 					root.AddValueRecursive(k)
 				}
 				
@@ -230,20 +230,20 @@ func main(){
 		}
 		
 	}
-	fmt.Println("Item Count")
+	//fmt.Println("Item Count")
 	for _,itemset:=range(frequentItemset){
 		j,_:=root.GetValueRecursive(itemset)
 		if j>0{
-			fmt.Println(itemset,j)
+			//fmt.Println(itemset,j)
 		}
 		
 	}
-	fmt.Println("sub-Item Count")
+	//fmt.Println("sub-Item Count")
 	//fmt.Println(len(subFrequentItemset))
 	for _,itemset:=range(subFrequentItemset){
 		j,_:=subRoot.GetValueRecursive(itemset)
 		if j>0{
-			fmt.Println(itemset,j)
+			//fmt.Println(itemset,j)
 		}
 	}
 	fmt.Println("Rule Mining")
