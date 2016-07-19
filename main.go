@@ -167,33 +167,37 @@ func main(){
 		//fmt.Println(newFrequentItemset)
 		frequentItemset= newFrequentItemset
 	}
+	
 	if *itemSetLen==2{
 		//fmt.Println("ooops")
 		for _,jj:=range(frequentItems){
 			subFrequentItemset = append(subFrequentItemset,[]int{jj})
 		}
+		//fmt.Println(subRoot)
 		for _,itemset:=range(subFrequentItemset){
 			//fmt.Println("adding node ",itemset,"to ")
 			subRoot.AddNodeWithoutValue(itemset)
 		}
 		for _,itemset:=range(transactions){
-			if len(itemset)<*itemSetLen-1{
+			/*if len(itemset)<*itemSetLen-1{
 				continue
-			}
+			}*/
 			//fmt.Println("Ordered Combination of ",itemset)
 			if len(itemset)==*itemSetLen-1{
 				//fmt.Println("Adding value to node ",itemset)
 				subRoot.AddValueWithoutCreate(itemset)
+				
 			}else{
 				//fmt.Println("Check Every Possible combination")
 				for i:=0;i<=len(itemset)-*itemSetLen+1;i++{
 					//fmt.Println(itemset[i])
-					for j:=i+1;j<=len(itemset)-*itemSetLen+2;j++{
+					/*for j:=i+1;j<=len(itemset)-*itemSetLen+2;j++{
 						k:=append([]int{itemset[i]},itemset[j:*itemSetLen+j-2]...)
-						//fmt.Println("Adding value to node ",k)
+						fmt.Println("Adding value to node ",k)
 						subRoot.AddValueWithoutCreate(k)
 						
-					}
+					}*/
+					subRoot.AddValueWithoutCreate([]int{itemset[i]})
 				}
 			}
 				
@@ -230,22 +234,22 @@ func main(){
 		}
 		
 	}
-	//fmt.Println("Item Count")
+	/*fmt.Println("Item Count")
 	for _,itemset:=range(frequentItemset){
 		j,_:=root.GetValueRecursive(itemset)
 		if j>0{
-			//fmt.Println(itemset,j)
+			fmt.Println(itemset,j)
 		}
 		
 	}
-	//fmt.Println("sub-Item Count")
+	fmt.Println("sub-Item Count")
 	//fmt.Println(len(subFrequentItemset))
 	for _,itemset:=range(subFrequentItemset){
 		j,_:=subRoot.GetValueRecursive(itemset)
 		if j>0{
-			//fmt.Println(itemset,j)
+			fmt.Println(itemset,j)
 		}
-	}
+	}*/
 	fmt.Println("Rule Mining")
 	fmt.Println("=====")
 	//fmt.Println(len(frequentItemset))
@@ -279,8 +283,24 @@ func main(){
 					os.Exit(1)
 				}
 				
+				
 			}
+			
 			//fmt.Println("Finish appending",itemset)
+		}
+		if *itemSetLen==2{
+			k2:=[]int{itemset[1]}
+			ua,err:=subRoot.GetValueRecursive(k2)
+			if err==nil && ua>0{
+				confidentLevel:=float64(allCount)/float64(ua)
+				if confidentLevel>*confidenceThreshold && ua>=*countThreshold && allCount>=*countThreshold{
+					fmt.Println("Confident Level",k2,itemset,ua,allCount,confidentLevel)
+				}
+			}else if err!=nil{
+				fmt.Println("Gagal Ambil ",k2)
+				fmt.Println(err.Error())
+				os.Exit(1)
+			}
 		}
 		
 	}
